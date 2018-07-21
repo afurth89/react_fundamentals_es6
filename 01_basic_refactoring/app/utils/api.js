@@ -6,7 +6,7 @@ const params = `?client_id=${id}&client_secret=${sec}`;
 
 function getProfile (username) {
   return axios.get(`https://api.github.com/users/${username}${params}`)
-    .then(({ data }) => data)
+    .then(({ data }) => data);
 }
 
 function getRepos (username) {
@@ -14,10 +14,10 @@ function getRepos (username) {
 }
 
 function getStarCount (repos) {
-  return repos.data.reduce((count, { stargazers_count }) => count +stargazers_count, 0);
+  return repos.data.reduce((count, { stargazers_count }) => count + stargazers_count, 0);
 }
 
-function calculateScore ({followers}, repos) {
+function calculateScore ({ followers }, repos) {
   return (followers * 3) + getStarCount(repos);
 }
 
@@ -30,25 +30,25 @@ function getUserData (player) {
   return Promise.all([
     getProfile(player),
     getRepos(player)
-  ]).then(([profile, repos]) => {
-    return {
+  ]).then(([profile, repos]) => ({
       profile,
       score: calculateScore(profile, repos)
-    }
-  });
+  }))
 }
 
-function sortPlayers (players) { 
-  return players.sort((a,b) => { b.score - a.score })
+function sortPlayers (players) {
+  return players.sort((a,b) => b.score - a.score);
 }
 
 module.exports = {
-  battle: (players) => {
+  battle (players) {
+    return Promise.all(players.map(getUserData))
       .then(sortPlayers)
-      .catch(handleError)
+      .catch(handleError);
   },
-  fetchPopularRepos: (language) => {
+  fetchPopularRepos (language) {
     const encodedURI = window.encodeURI(`https://api.github.com/search/repositories?q=stars:>1+language:${language}&sort=stars&order=desc&type=Repositories`);
-    return axios.get(encodedURI).then(({data}) => { data.items })
+
+    return axios.get(encodedURI).then(({ data }) => data.items);
   }
-}
+};
