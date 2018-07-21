@@ -14,7 +14,7 @@ function getRepos (username) {
 }
 
 function getStarCount (repos) {
-  return repos.data.reduce((count, {stargazers_count}) => { count + stargazers_count }, 0);
+  return repos.data.reduce((count, { stargazers_count }) => count +stargazers_count, 0);
 }
 
 function calculateScore ({followers}, repos) {
