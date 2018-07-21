@@ -1,18 +1,18 @@
-var React = require('react');
-var PropTypes = require('prop-types');
-var api = require('../utils/api');
-var Loading = require('./Loading')
+const React = require('react');
+const PropTypes = require('prop-types');
+const api = require('../utils/api');
+const Loading = require('./Loading')
 
 function SelectLanguage (props) {
-  var languages = ["All", "JavaScript", "Ruby", "Java", "CSS", "Python"];
+  const languages = ["All", "JavaScript", "Ruby", "Java", "CSS", "Python"];
 
   return (
     <ul className='languages'>  
-      {languages.map(function(lang) {
+      {languages.map((lang) => {
         return (
           <li 
             style={lang === props.selectedLanguage ? {color: '#d0021b'} : null}
-            onClick={props.onSelect.bind(null, lang)}
+            onClick={() => props.onSelect(lang)}
             key={lang}
           >
             {lang}
@@ -26,21 +26,23 @@ function SelectLanguage (props) {
 function RepoGrid (props) {
   return (
     <ul className='popular-list'>
-      {props.repos.map(function(repo, index) {
+      {props.repos.map((repo, index) => {
+        const { owner, html_url, name , stargazers_count } = repo
+        const { avatar_url, login } = owner
         return (
-          <li key={repo.name} className='popular-item'>
+          <li key={name} className='popular-item'>
             <div className='popular-rank'>#{index + 1}</div>
             <ul className='space-list-items'>
               <li>
                 <img 
                   className='avatar'
-                  src={repo.owner.avatar_url}
-                  alt={'Avatar for ' + repo.owner.login}
+                  src={avatar_url}
+                  alt={`Avatar for ${login}`}
                 />
               </li>
-              <li><a href={repo.html_url}>{repo.name}</a></li>
-              <li>@{repo.owner.login}</li>
-              <li>{repo.stargazers_count} stars</li>
+              <li><a href={html_url}>{name}</a></li>
+              <li>@{login}</li>
+              <li>{stargazers_count} stars</li>
             </ul>
           </li>
         )
@@ -75,7 +77,7 @@ class Popular extends React.Component {
   }
 
   updateLanguage(lang) {
-    this.setState(function() {
+    this.setState(() => {
       return {
         selectedLanguage: lang,
         repos: null
@@ -83,25 +85,20 @@ class Popular extends React.Component {
     })
     
     api.fetchPopularRepos(lang)
-      .then(function(repos) {
-        this.setState(function() {
-          return {
-            repos: repos
-          }
-        })
-      }.bind(this));
+      .then((repos) => this.setState(() => ({ repos })));
   }
 
   render() {
+    const { repos, selectedLanguage } = this.state;
     return (
       <div>
         <SelectLanguage 
-          selectedLanguage={this.state.selectedLanguage}
+          selectedLanguage={selectedLanguage}
           onSelect={this.updateLanguage}
         />
-        { !this.state.repos
-          ? <Loading />
-          : <RepoGrid repos={this.state.repos} /> }
+        { !repos
+            ? <Loading />
+            : <RepoGrid repos={repos} /> }
       </div>
     )
   }
