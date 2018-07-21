@@ -27,7 +27,7 @@ function handleError (error) {
 }
 
 function getUserData (player) {
-  return axios.all([
+  return Promise.all([
     getProfile(player),
     getRepos(player)
   ]).then(([profile, repos]) => {
@@ -44,7 +44,6 @@ function sortPlayers (players) {
 
 module.exports = {
   battle: (players) => {
-    return axios.all(players.map(getUserData))
       .then(sortPlayers)
       .catch(handleError)
   },
